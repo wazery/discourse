@@ -47,6 +47,11 @@ test('tags with arguments', function() {
   format("[b]first[/b] [b]second[/b]", "<span class=\"bbcode-b\">first</span> <span class=\"bbcode-b\">second</span>", "can bold two things on the same line");
 });
 
+test('tags with arguments in quotes', function() {
+  format("[url=\"http://bettercallsaul.com\"]better call![/url]", "<a href=\"http://bettercallsaul.com\">better call!</a>", "supports [url] with a title in double quotes");
+  format("[email='eviltrout@mailinator.com']evil trout[/email]", "<a href=\"mailto:eviltrout@mailinator.com\">evil trout</a>", "supports [email] with a title in single quotes");
+});
+
 test("size tags", function() {
   format("[size=35]BIG [b]whoop[/b][/size]",
          "<span class=\"bbcode-size-35\">BIG <span class=\"bbcode-b\">whoop</span></span>",

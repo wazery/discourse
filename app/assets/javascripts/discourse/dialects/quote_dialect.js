@@ -3,7 +3,7 @@
 **/
 Discourse.Dialect.replaceBlock({
   start: new RegExp("\\[quote=?([^\\[\\]]+)?\\]([\\s\\S]*)", "igm"),
-  stop: '[/quote]',
+  stop: /\[\/quote\]/i,
   emitter: function(blockContents, matches, options) {
 
     var params = {'class': 'quote'},

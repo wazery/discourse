@@ -15,12 +15,12 @@
 **/
 function replaceBBCode(tag, emitter, opts) {
   opts = opts || {};
-  opts = _.merge(opts, { start: "[" + tag + "]", stop: "[/" + tag + "]", emitter: emitter });
-  Discourse.Dialect.inlineBetween(opts);
+  opts = _.merge(opts, { emitter: emitter });
+
+  Discourse.Dialect.inlineBetween(_.merge(opts, { start: "[" + tag + "]", stop: "[/" + tag + "]"}));
 
   tag = tag.toUpperCase();
-  opts = _.merge(opts, { start: "[" + tag + "]", stop: "[/" + tag + "]", emitter: emitter });
-  Discourse.Dialect.inlineBetween(opts);
+  Discourse.Dialect.inlineBetween(_.merge(opts, { start: "[" + tag + "]", stop: "[/" + tag + "]" }));
 }
 
 /**
@@ -42,17 +42,20 @@ function rawBBCode(tag, emitter) {
   @param {function} emitter the function that creates JsonML for the tag
 **/
 function replaceBBCodeParamsRaw(tag, emitter) {
-  Discourse.Dialect.inlineBetween({
-    start: "[" + tag + "=",
-    stop: "[/" + tag + "]",
+  var opts = {
     rawContents: true,
     emitter: function(contents) {
-      var regexp = /^([^\]]+)\](.*)$/,
+      var regexp = /^["']?(.+?)["']?\](.*)$/,
           m = regexp.exec(contents);
 
       if (m) { return emitter.call(this, m[1], m[2]); }
     }
-  });
+  };
+
+  Discourse.Dialect.inlineBetween(_.merge(opts, { start: "[" + tag + "=", stop: "[/" + tag + "]" }));
+
+  tag = tag.toUpperCase();
+  Discourse.Dialect.inlineBetween(_.merge(opts, { start: "[" + tag + "=", stop: "[/" + tag + "]" }));
 }
 
 /**
@@ -104,9 +107,52 @@ replaceBBCodeParams("size", function(param, contents) {
 // Handles `[code] ... [/code]` blocks
 Discourse.Dialect.replaceBlock({
   start: /(\[code\])([\s\S]*)/igm,
-  stop: '[/code]',
+  stop: /\[\/code\]/i,
 
   emitter: function(blockContents) {
     return ['p', ['pre'].concat(blockContents.join("\n"))];
   }
 });
+
+
+// TO EXTRACT
+
+replaceBBCodeParams("color", function(param, contents) {
+  return ['font', {'color': param}].concat(contents);
+});
+
+replaceBBCodeParams("size", function(param, contents) {
+  return ['font', {'size': param}].concat(contents);
+});
+
+replaceBBCodeParams("font", function(param, contents) {
+  return ['font', {'face': param}].concat(contents);
+});
+
+replaceBBCode("small", function(contents) { return ['span', {'style': 'font-size:x-small'}].concat(contents); });
+
+replaceBBCode("highlight", function(contents) { return ['span', {'class': 'highlight'}].concat(contents); });
+
+["left", "center", "right"].forEach(function(direction){
+  replaceBBCode(direction, function(contents) { return ['div', {'style': "text-align:" + direction}].concat(contents); });
+});
+
+rawBBCode("noparse", function(contents) { return contents; });
+
+replaceBBCodeParams("aname", function(param, contents) {
+  return ['a', {'name': param, 'data-bbcode': true}].concat(contents);
+});
+
+rawBBCode('fphp', function(contents) { return ['a', {href: "http://www.php.net/manual-lookup.php?function=" + contents, 'data-bbcode': true}, contents]; });
+replaceBBCodeParamsRaw("fphp", function(param, contents) {
+  return ['a', {href: "http://www.php.net/manual-lookup.php?function=" + param, 'data-bbcode': true}, contents];
+});
+
+rawBBCode('google', function(contents) { return ['a', {href: "http://www.google.com/search?q=" + contents, 'data-bbcode': true}, contents]; });
+
+replaceBBCodeParams("jumpto", function(param, contents) {
+  return ['a', {href: "#" + param, 'data-bbcode': true}].concat(contents);
+});
+
+replaceBBCode('edit', function(contents) { return ['div', {'class': 'sepquote'}, ['span', { 'class': 'smallfont' }, "Edit:"], ['br'], ['br']].concat(contents); });
+replaceBBCode('ot', function(contents) { return ['div', {'class': 'sepquote'}, ['span', { 'class': 'smallfont' }, "Off Topic:"], ['br'], ['br']].concat(contents); });

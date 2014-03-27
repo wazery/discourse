@@ -352,11 +352,10 @@ Discourse.Dialect = {
 
       lineNumber++;
 
-
       var blockClosed = false;
       if (next.length > 0) {
         for (var i=0; i<next.length; i++) {
-          if (next[i].indexOf(args.stop) >= 0) {
+          if ((args.stop instanceof RegExp ? next[i].search(args.stop) : next[i].indexOf(args.stop)) >= 0) {
             blockClosed = true;
             break;
           }
@@ -372,9 +371,19 @@ Discourse.Dialect = {
         var b = next.shift(),
             blockLine = b.lineNumber,
             diff = ((typeof blockLine === "undefined") ? lineNumber : blockLine) - lineNumber,
-            endFound = b.indexOf(args.stop),
-            leadingContents = b.slice(0, endFound),
-            trailingContents = b.slice(endFound+args.stop.length);
+            endFound, split, stopLength, leadingContents, trailingContents;
+
+        if (args.stop instanceof RegExp) {
+          endFound = b.search(args.stop);
+          split = b.split(args.stop);
+          leadingContents = split[0];
+          trailingContents = split[1];
+        } else {
+          endFound = b.indexOf(args.stop);
+          stopLength = args.stop.length;
+          leadingContents = b.slice(0, endFound);
+          trailingContents = b.slice(endFound + stopLength);
+        }
 
         if (endFound >= 0) { blockClosed = true; }
         for (var j=1; j<diff; j++) {
@@ -399,6 +408,7 @@ Discourse.Dialect = {
       if (emitterResult) {
         result.push(emitterResult);
       }
+
       return result;
     });
   },

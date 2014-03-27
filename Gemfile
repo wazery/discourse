@@ -187,6 +187,11 @@ group :development do
   gem 'librarian', '>= 0.0.25', require: false
   gem 'annotate'
   gem 'foreman', require: false
+
+  group :import do
+    gem 'parallel', require: false
+  end
+
 end
 
 # Gem that enables support for plugins. It is required.

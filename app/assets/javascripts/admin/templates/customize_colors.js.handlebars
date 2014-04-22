@@ -37,7 +37,7 @@
             {{#each colors}}
               <tr {{bind-attr class="changed"}}>
                 <td class="name">{{name}}</td>
-                <td class="hex">{{color-input hexValue=hex}}</td>
+                <td class="hex">{{color-input hexValue=hex brightnessValue=brightness}}</td>
                 <td class="opacity">{{textField class="opacity-input" value=opacity maxlength="3"}}</td>
                 <td class="changed">
                   <button {{bind-attr class=":btn :undo changed::invisible"}} {{action undo this}}>undo</button>

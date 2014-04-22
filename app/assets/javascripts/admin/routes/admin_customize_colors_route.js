@@ -10,6 +10,11 @@ Discourse.AdminCustomizeColorsRoute = Discourse.Route.extend({
 
   model: function() {
     return Discourse.ColorScheme.findAll();
-  }
+  },
+
+  deactivate: function() {
+    this._super();
+    this.controllerFor('adminCustomizeColors').set('selectedItem', null);
+  },
 
 });

@@ -285,6 +285,11 @@ class UsersController < ApplicationController
     render nothing: true
   end
 
+  def get_username_from_email
+    user = User.find_by(email: params[:email])
+    render json: username: user.username_lower if user
+  end
+
   def enqueue_activation_email
     @email_token ||= @user.email_tokens.create(email: @user.email)
     Jobs.enqueue(:user_email, type: :signup, user_id: @user.id, email_token: @email_token.token)

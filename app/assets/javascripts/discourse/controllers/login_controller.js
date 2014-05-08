@@ -46,11 +46,19 @@ Discourse.LoginController = Discourse.Controller.extend(Discourse.ModalFunctiona
 
   actions: {
     login: function() {
-      this.set('loggingIn', true);
-
       var loginController = this;
+      loginController.set('loggingIn', true);
+
+      // if user is logging with email change loginName to username
+      // todo: add checking for email template
+      Discourse.ajax("/users/get_username_from_email", {
+        data: { email: loginController.get('loginName')},
+        type: 'GET'
+      }).then(function (result) {
+        loginController.set('loginName', result.username);
+      });
       Discourse.ajax("/session", {
-        data: { login: this.get('loginName'), password: this.get('loginPassword') },
+        data: { login: loginController.get('loginName'), password: loginController.get('loginPassword') },
         type: 'POST'
       }).then(function (result) {
         // Successful login
